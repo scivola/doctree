@@ -57,6 +57,60 @@ OS のページサイズをバイト数で表した値です。
 バッファを仮想メモリ機構(Unix では匿名 mmap、Windows では VirtualAlloc)で
 確保することを表すフラグです。[m:IO::Buffer.new] の flags に指定します。
 
+### const EXTERNAL -> Integer
+
+バッファが外部(external)のメモリ領域、すなわち [c:String] など他のオブジェクトが
+所有するメモリ領域を指していることを表すフラグです。
+
+### const INTERNAL -> Integer
+
+バッファが内部(internal)のメモリ領域、すなわち Ruby が直接確保したメモリ領域を
+指していることを表すフラグです。
+
+#@since 3.2
+### const SHARED -> Integer
+
+バッファが他のプロセスと共有されるメモリ領域を指していることを表すフラグです。
+#@end
+
+### const LOCKED -> Integer
+
+バッファがロックされていることを表すフラグです。
+
+ロックされている間はバッファの解放やリサイズができません。
+[m:IO::Buffer#locked] を参照してください。
+
+### const PRIVATE -> Integer
+
+バッファがコピーオンライトで確保されていることを表すフラグです。
+
+このバッファへの変更は元のメモリ領域には反映されません。
+
+### const READONLY -> Integer
+
+バッファが読み込み専用であることを表すフラグです。
+
+このフラグが立っているバッファに書き込もうとすると
+[c:IO::Buffer::AccessError] が発生します。
+
+### const LITTLE_ENDIAN -> Integer
+### const BIG_ENDIAN -> Integer
+### const HOST_ENDIAN -> Integer
+### const NETWORK_ENDIAN -> Integer
+
+バイトオーダー(エンディアン)を表す定数です。
+
+HOST_ENDIAN は実行中の環境のバイトオーダーで、LITTLE_ENDIAN か BIG_ENDIAN の
+いずれかと同じ値になります。NETWORK_ENDIAN はネットワークバイトオーダーで、
+BIG_ENDIAN と同じ値です。
+
+```ruby
+p IO::Buffer::NETWORK_ENDIAN == IO::Buffer::BIG_ENDIAN # => true
+
+# リトルエンディアンの環境の場合
+p IO::Buffer::HOST_ENDIAN == IO::Buffer::LITTLE_ENDIAN # => true
+```
+
 ## Class Methods
 
 ### def new(size = IO::Buffer::DEFAULT_SIZE, flags = 0) -> IO::Buffer
@@ -136,6 +190,7 @@ buf.get_string(0, 99)   # ~> ArgumentError
 - **raise** `ArgumentError` -- offset と length の合計がバッファのバイト数を超える場合に発生します。
 
 - **raise** `IO::Buffer::AccessError` -- 書き込みできないバッファに対して呼び出した場合に発生します。
+             詳しくは [c:IO::Buffer::AccessError] を参照してください。
 
 ```ruby
 buf = IO::Buffer.new(8)
